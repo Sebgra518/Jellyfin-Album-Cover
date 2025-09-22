@@ -1,4 +1,5 @@
+# rpi-rgb-led-matrix must be built manually:
+# https://github.com/hzeller/rpi-rgb-led-matrix
 jellyfin-apiclient-python
 Pillow
 python-dotenv
-rpi-rgb-led-matrix

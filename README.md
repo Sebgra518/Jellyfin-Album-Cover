@@ -17,7 +17,7 @@ Show the currently playing album art from Jellyfin on a 128×128 LED matrix (4×
 * Fetches the currently playing track from Jellyfin and retrieves the album art
 * Resizes/converts the art and displays it on a 128×128 panel (4× 64×64)
 * Runs automatically on boot as a service
-* Uses the battle‑tested [`hzeller/rpi-rgb-led-matrix`](https://github.com/hzeller/rpi-rgb-led-matrix) library
+* Uses the [`hzeller/rpi-rgb-led-matrix`](https://github.com/hzeller/rpi-rgb-led-matrix) library
 
 ---
 
@@ -64,18 +64,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-*Example `requirements.txt`*
-
-```
-jellyfin-apiclient-python
-Pillow
-python-dotenv
-rpi-rgb-led-matrix
-```
-
 ### 3) Configure environment
 
-Create a `.env` in the project root (do not commit it):
+Edit a `.env.example` in the project root (dont forget to remove .example extension):
 
 ```
 JELLYFIN_URL=http://192.168.x.y:8096

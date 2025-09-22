@@ -286,14 +286,6 @@ if __name__ == "__main__":
 
 ---
 
-## What reviewers should look at (for hiring managers)
-
-* Clean separation of concerns (API, image processing, display)
-* Safe secret handling via `.env`
-* Robust failure handling (no session, no image, bad network)
-* Service packaging and reproducible setup
-
----
 
 ## License
 

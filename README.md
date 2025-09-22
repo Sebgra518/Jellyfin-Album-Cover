@@ -2,8 +2,6 @@
 
 Show the currently playing album art from Jellyfin on a 128×128 LED matrix (4× 64×64 panels) driven by a Raspberry Pi 4B and a Raspberry Pi RGB matrix HAT.
 
-> ⚠️ **Security note**: Do **not** commit real server addresses, usernames, or passwords. This README uses environment variables and an `.env` file. Rotate any credentials you’ve previously committed.
-
 ---
 
 ## Demo
@@ -99,7 +97,7 @@ MATRIX_MULTIPLEXING=0
 
 ```bash
 source .venv/bin/activate
-python album_display.py
+sudo python3 album_display.py
 ```
 
 ### Run on boot (systemd)

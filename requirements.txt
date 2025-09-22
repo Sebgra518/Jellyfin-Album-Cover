@@ -1,0 +1,4 @@
+jellyfin-apiclient-python
+Pillow
+python-dotenv
+rpi-rgb-led-matrix

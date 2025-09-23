@@ -10,6 +10,7 @@ JELLYFIN_URL = os.getenv("JELLYFIN_URL")
 JELLYFIN_FALLBACK_URL = os.getenv("JELLYFIN_FALLBACK_URL")
 USER = os.getenv("JELLYFIN_USER")
 PASSWORD = os.getenv("JELLYFIN_PASSWORD")
+MEDIA_MOUNT_POINT = os.getenv("MEDIA_MOUNT_POINT")
 
 opts = RGBMatrixOptions()
 opts.rows = int(os.getenv("MATRIX_ROWS", 64))
@@ -21,11 +22,11 @@ opts.limit_refresh_rate_hz = int(os.getenv("MATRIX_LIMIT_HZ", 60))
 opts.gpio_slowdown = int(os.getenv("MATRIX_GPIO_SLOWDOWN", 2))
 opts.multiplexing = int(os.getenv("MATRIX_MULTIPLEXING", 0))
 opts.hardware_mapping = "regular"
+opts.drop_privileges = False
 
 client = JellyfinClient()
 client.config.app("LED Album Display", "0.1.0", "RaspberryPi", "1")
 client.config.data["auth.ssl"] = True
-
 
 def login(client):
     for url in filter(None, [JELLYFIN_URL, JELLYFIN_FALLBACK_URL]):
@@ -37,41 +38,60 @@ def login(client):
             continue
     raise RuntimeError("Failed to connect to Jellyfin")
 
-
 def current_album_image_path():
     sessions = client.jellyfin.get_sessions()
+
     if not sessions or "NowPlayingItem" not in sessions[0]:
-        raise RuntimeError("No session playing")
+        return None
+    
     album_id = sessions[0]["NowPlayingItem"].get("AlbumId")
+
     if not album_id:
-        raise RuntimeError("No album info in current session")
+        raise RuntimeError("No album ID")
+    
     images = client.jellyfin.get_images(album_id)
+
     if not images:
         raise RuntimeError("No images for album")
+    #print(images[0]["Path"])
     return images[0]["Path"]
-
 
 def open_and_fit(path):
     img = Image.open(path.replace("\\", "/")).convert("RGB")
     img = img.resize((128, 128))
     return img
 
+def convert_to_mount_path(server_path: str) -> str:
+    if not MEDIA_MOUNT_POINT:
+        raise RuntimeError("MOUNT_POINT is not set in environment")
+    # strip leading backslashes or slashes from Jellyfin path if needed
+    return os.path.join(MEDIA_MOUNT_POINT, server_path.lstrip("/\\"))
 
 def main():
     url = login(client)
     print(f"Connected to Jellyfin at {url}")
-    path = current_album_image_path()
-    print(f"Album image: {path}")
 
-    img = open_and_fit(path)
     matrix = RGBMatrix(options=opts)
 
-    try:
-        img.thumbnail((matrix.width, matrix.height))
-        matrix.SetImage(img)
-        time.sleep(60)
-    finally:
-        matrix.Clear()
+    oldpath = None
+
+    while True:
+
+        path = current_album_image_path()
+
+        if(path == None):
+            matrix.Clear()
+            print("No track playing")
+
+        if(oldpath != path):
+            newpath = convert_to_mount_path(path)
+
+            newimg = open_and_fit(newpath)
+        
+            newimg.thumbnail((matrix.width, matrix.height))
+            matrix.SetImage(newimg)
+
+        time.sleep(1)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ Show the currently playing album art from Jellyfin on a 128×128 LED matrix (4×
 
 ## Demo
 
-*Add a short GIF or video here (5–10s). A crisp demo does more than paragraphs.*
+[![Watch the demo](https://img.youtube.com/vi/KCaZ_EYdqnM/0.jpg)](https://www.youtube.com/shorts/KCaZ_EYdqnM)
 
 ---
 

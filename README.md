@@ -49,17 +49,32 @@ Jellyfin Server ──(HTTP API)──> Raspberry Pi 4B ──HUB75──> Elect
 
 ## Setup
 
-### 1) Clone and install matrix library
-
-Follow the official instructions from `hzeller/rpi-rgb-led-matrix` to build and enable GPIO access for your Pi. Make sure examples can run before continuing.
-
 ### 2) Project install
 
 ```bash
-# inside your projects dir
+git clone https://github.com/Sebgra518/Jellyfin-Album-Cover
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+### 2) Clone and install `hzeller/rpi-rgb-led-matrix`
+```bash
+sudo apt update
+sudo apt install -y git build-essential python3-dev cmake python3-pillow
+
+# activate the SAME venv you run with sudo
+cd ~/Jellyfin-Album-Cover
+source ./.venv/bin/activate
+
+# get the repo
+cd ~
+[ -d rpi-rgb-led-matrix ] || git clone https://github.com/hzeller/rpi-rgb-led-matrix.git
+cd rpi-rgb-led-matrix/bindings/python
+
+# build the C++ extension and install it INTO THIS VENV
+make clean
+make build-python PYTHON="$(which python)"
+make install-python PYTHON="$(which python)"
 ```
 
 ### 3) Configure environment

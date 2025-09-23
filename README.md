@@ -97,7 +97,8 @@ MATRIX_MULTIPLEXING=0
 
 ```bash
 source .venv/bin/activate
-sudo python3 album_display.py
+cd ~/Jellyfin-Album-Cover
+sudo ./.venv/bin/python3 ./album_display.py
 ```
 
 ### Run on boot (systemd)

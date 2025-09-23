@@ -49,7 +49,7 @@ Jellyfin Server ──(HTTP API)──> Raspberry Pi 4B ──HUB75──> Elect
 
 ## Setup
 
-### 2) Project install
+### 1) Project install
 
 ```bash
 git clone https://github.com/Sebgra518/Jellyfin-Album-Cover

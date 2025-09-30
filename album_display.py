@@ -1,19 +1,10 @@
-import os, sys, time, io, hashlib, random, string, requests
+import os, sys, time
 from dotenv import load_dotenv
-from typing import Optional, Tuple
 from PIL import Image
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from jellyfin_apiclient_python.client import JellyfinClient
 
 load_dotenv()
-
-# --- Navidrome/Subsonic config ---
-ND_URL   = os.getenv("NAVIDROME_URL", "").rstrip("/")
-ND_USER  = os.getenv("NAVIDROME_USER")
-ND_PASS  = os.getenv("NAVIDROME_PASSWORD")
-ND_CLIENT= os.getenv("NAVIDROME_CLIENT", "led-matrix")
-API_VER  = "1.16.1"   # Subsonic compatible
-POLL     = int(os.getenv("POLL_SECONDS", 5))
 
 JELLYFIN_URL = os.getenv("JELLYFIN_URL")
 JELLYFIN_FALLBACK_URL = os.getenv("JELLYFIN_FALLBACK_URL")
@@ -75,65 +66,6 @@ def convert_to_mount_path(server_path: str) -> str:
         raise RuntimeError("MOUNT_POINT is not set in environment")
     # strip leading backslashes or slashes from Jellyfin path if needed
     return os.path.join(MEDIA_MOUNT_POINT, server_path.lstrip("/\\"))
-
-#--------------------------------------Navidrome--------------------------------------#
-# --- auth helper (Subsonic token auth) ---
-def _salt(n=8) -> str:
-    return "".join(random.choices(string.ascii_letters + string.digits, k=n))
-
-def _token(password: str, salt: str) -> str:
-    # token = md5(password + salt)
-    h = hashlib.md5()
-    h.update((password + salt).encode("utf-8"))
-    return h.hexdigest()
-
-def _auth_params() -> dict:
-    if not (ND_URL and ND_USER and ND_PASS):
-        raise RuntimeError("Missing NAVIDROME_URL / NAVIDROME_USER / NAVIDROME_PASSWORD")
-    s = _salt()
-    return {
-        "u": ND_USER,
-        "t": _token(ND_PASS, s),
-        "s": s,
-        "v": API_VER,
-        "c": ND_CLIENT,
-        "f": "json"
-    }
-
-# --- API calls ---
-def get_now_playing_for_user(username: str) -> Optional[dict]:
-    """
-    Returns the first now-playing entry for the given user, or None if nothing is playing.
-    """
-    params = _auth_params()
-    url = f"{ND_URL}/rest/getNowPlaying.view"
-    r = requests.get(url, params=params, timeout=5)
-    r.raise_for_status()
-    data = r.json()
-    entries = data.get("subsonic-response", {}).get("nowPlaying", {}).get("entry", [])
-    if not entries:
-        return None
-    # Navidrome may report multiple users; pick this user
-    for e in entries:
-        if e.get("username") == username:
-            return e
-    # If nothing matched, return first (optional) or None
-    return None
-
-def get_cover_image(cover_id: str, size: Tuple[int,int]=(128,128)) -> Image.Image:
-    params = _auth_params()
-    # size is optional; many servers accept 'size' to scale
-    params["id"] = cover_id
-    params["size"] = max(size)  # Subsonic expects a single edge size
-    url = f"{ND_URL}/rest/getCoverArt.view"
-    r = requests.get(url, params=params, timeout=10)
-    r.raise_for_status()
-    img = Image.open(io.BytesIO(r.content)).convert("RGB")
-    if img.size != size:
-        img = img.resize(size)
-    return img
-
-
 
 def main():
     url = login(client)
